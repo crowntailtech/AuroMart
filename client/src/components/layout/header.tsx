@@ -87,6 +87,17 @@ export default function Header() {
             >
               Reports
             </Link>
+            <Link 
+              href="/partnerships" 
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                location === '/partnerships' 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="nav-partnerships"
+            >
+              Partnerships
+            </Link>
           </nav>
 
           {/* Right side */}

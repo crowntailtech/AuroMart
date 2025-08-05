@@ -238,14 +238,56 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
 });
 
+// Business partnerships/connections table
+export const partnerships = pgTable("partnerships", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  requesterId: varchar("requester_id").notNull().references(() => users.id),
+  partnerId: varchar("partner_id").notNull().references(() => users.id),
+  status: varchar("status", { enum: ["pending", "approved", "rejected"] }).notNull().default("pending"),
+  partnershipType: varchar("partnership_type", { enum: ["supplier", "distributor", "retailer"] }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,
   createdAt: true,
 });
 
+export const insertPartnershipSchema = createInsertSchema(partnerships).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+export const partnershipsRelations = relations(partnerships, ({ one }) => ({
+  requester: one(users, {
+    fields: [partnerships.requesterId],
+    references: [users.id],
+    relationName: "partnershipRequester",
+  }),
+  partner: one(users, {
+    fields: [partnerships.partnerId],
+    references: [users.id],
+    relationName: "partnershipPartner",
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  sentPartnershipRequests: many(partnerships, { relationName: "partnershipRequester" }),
+  receivedPartnershipRequests: many(partnerships, { relationName: "partnershipPartner" }),
+  manufacturerProducts: many(products),
+  distributorInventory: many(inventory),
+  customerOrders: many(orders, { relationName: "customerOrders" }),
+  supplierOrders: many(orders, { relationName: "supplierOrders" }),
+}));
+
+export type Partnership = typeof partnerships.$inferSelect;
+export type InsertPartnership = typeof partnerships.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;

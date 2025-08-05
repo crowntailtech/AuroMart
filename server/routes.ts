@@ -277,6 +277,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Partnership routes
+  app.get("/api/partnerships", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const partnerships = await storage.getPartnerships(userId);
+      res.json(partnerships);
+    } catch (error) {
+      console.error("Error fetching partnerships:", error);
+      res.status(500).json({ message: "Failed to fetch partnerships" });
+    }
+  });
+
+  app.get("/api/partners/available", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const availablePartners = await storage.getAvailablePartners(userId, user.role);
+      res.json(availablePartners);
+    } catch (error) {
+      console.error("Error fetching available partners:", error);
+      res.status(500).json({ message: "Failed to fetch available partners" });
+    }
+  });
+
+  app.post("/api/partnerships/request", isAuthenticated, async (req: any, res) => {
+    try {
+      const requesterId = req.user.claims.sub;
+      const { partnerId, partnershipType } = req.body;
+      
+      if (!partnerId || !partnershipType) {
+        return res.status(400).json({ message: "Partner ID and partnership type are required" });
+      }
+
+      const partnership = await storage.sendPartnershipRequest(requesterId, partnerId, partnershipType);
+      res.json(partnership);
+    } catch (error) {
+      console.error("Error sending partnership request:", error);
+      res.status(500).json({ message: "Failed to send partnership request" });
+    }
+  });
+
+  app.patch("/api/partnerships/:id/respond", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const partnership = await storage.respondToPartnershipRequest(id, status);
+      res.json(partnership);
+    } catch (error) {
+      console.error("Error responding to partnership request:", error);
+      res.status(500).json({ message: "Failed to respond to partnership request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
