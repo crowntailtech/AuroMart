@@ -16,7 +16,7 @@ export default function Products() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function Products() {
   });
 
   const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/products", selectedCategory],
+    queryKey: ["/api/products", selectedCategory === "all" ? "" : selectedCategory],
     enabled: !!user,
   });
 
@@ -96,7 +96,7 @@ export default function Products() {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {Array.isArray(categories) && categories.map((category: any) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
