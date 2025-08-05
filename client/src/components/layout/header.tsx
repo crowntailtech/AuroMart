@@ -66,6 +66,17 @@ export default function Header() {
               Products
             </Link>
             <Link 
+              href="/partners" 
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                location === '/partners' 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              data-testid="nav-partners"
+            >
+              Partners
+            </Link>
+            <Link 
               href="/orders" 
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 location === '/orders' 

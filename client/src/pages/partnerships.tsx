@@ -11,15 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Plus, Search, CheckCircle, XCircle, Clock, Building2 } from "lucide-react";
 import { isUnauthorizedError } from "@/lib/authUtils";
-
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  companyName: string;
-}
+import type { User } from "@/hooks/useAuth";
 
 interface Partnership {
   id: string;
@@ -38,31 +30,39 @@ export default function Partnerships() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPartnershipType, setSelectedPartnershipType] = useState<string>("");
   const [isAddPartnerOpen, setIsAddPartnerOpen] = useState(false);
+  const [productSearchTerm, setProductSearchTerm] = useState("");
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
 
   // Fetch current partnerships
   const { data: partnerships = [], isLoading: partnershipsLoading } = useQuery<Partnership[]>({
-    queryKey: ["/api/partnerships"],
+    queryKey: ["api", "partnerships"],
     enabled: isAuthenticated,
   });
 
   // Fetch available partners to connect with
   const { data: availablePartners = [], isLoading: partnersLoading } = useQuery<User[]>({
-    queryKey: ["/api/partners/available"],
+    queryKey: ["api", "partners", "available"],
     enabled: isAuthenticated,
+  });
+
+  // Global product search
+  const { data: globalSearchResults = [], isLoading: globalSearchLoading } = useQuery<User[]>({
+    queryKey: ["api", "partners", "search", productSearchTerm],
+    enabled: isAuthenticated && productSearchTerm.length > 2,
   });
 
   // Send partnership request mutation
   const sendRequestMutation = useMutation({
     mutationFn: async ({ partnerId, partnershipType }: { partnerId: string; partnershipType: string }) => {
-      await apiRequest("/api/partnerships/request", "POST", { partnerId, partnershipType });
+      await apiRequest("POST", "/api/partnerships/request", { partnerId, partnershipType });
     },
     onSuccess: () => {
       toast({
         title: "Partnership Request Sent",
         description: "Your partnership request has been sent successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/partnerships"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/partners/available"] });
+      queryClient.invalidateQueries({ queryKey: ["api", "partnerships"] });
+      queryClient.invalidateQueries({ queryKey: ["api", "partners", "available"] });
       setIsAddPartnerOpen(false);
       setSelectedPartnershipType("");
     },
@@ -74,7 +74,7 @@ export default function Partnerships() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }
@@ -95,6 +95,7 @@ export default function Partnerships() {
       });
       return;
     }
+
     sendRequestMutation.mutate({ partnerId, partnershipType: selectedPartnershipType });
   };
 
@@ -158,7 +159,7 @@ export default function Partnerships() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Current Partnerships */}
           <Card data-testid="card-current-partnerships">
             <CardHeader>
@@ -336,6 +337,113 @@ export default function Partnerships() {
                       </div>
                     ))}
                   </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Global Product Search */}
+          <Card data-testid="card-global-search">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Global Product Search
+              </CardTitle>
+              <CardDescription>
+                Search for products across all partners when your favorites don't have what you need
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search for products (e.g., pencil box, notebook)..."
+                    value={productSearchTerm}
+                    onChange={(e) => setProductSearchTerm(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-search-products"
+                  />
+                </div>
+
+                {productSearchTerm.length > 2 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Searching for "{productSearchTerm}"...
+                    </p>
+                    
+                    {globalSearchLoading ? (
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="animate-pulse bg-gray-200 dark:bg-gray-700 h-16 rounded" />
+                        ))}
+                      </div>
+                    ) : globalSearchResults.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 dark:text-gray-400">No partners found with this product</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500">
+                          Try searching for a different product or check spelling
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4 max-h-96 overflow-y-auto">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Found {globalSearchResults.length} partners with "{productSearchTerm}"
+                        </p>
+                        {globalSearchResults.map((partner) => (
+                          <div
+                            key={partner.id}
+                            className="flex items-center justify-between p-4 border rounded-lg bg-white dark:bg-gray-800 border-green-200 dark:border-green-800"
+                            data-testid={`card-global-search-${partner.id}`}
+                          >
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-medium text-gray-900 dark:text-white">
+                                  {partner.businessName || `${partner.firstName} ${partner.lastName}`}
+                                </h3>
+                                <Badge variant="outline" className="text-green-600 border-green-600">
+                                  Has Product
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                                {getRoleDescription(partner.role)}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {partner.email}
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="text-green-600 border-green-600 hover:bg-green-50"
+                                data-testid={`button-contact-${partner.id}`}
+                              >
+                                Contact
+                              </Button>
+                              <Button 
+                                size="sm"
+                                onClick={() => {
+                                  // Add to available partners and open connection dialog
+                                  setIsAddPartnerOpen(true);
+                                }}
+                                data-testid={`button-connect-global-${partner.id}`}
+                              >
+                                Connect
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {productSearchTerm.length > 0 && productSearchTerm.length <= 2 && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Type at least 3 characters to search for products
+                  </p>
                 )}
               </div>
             </CardContent>

@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: auromart-postgres
+    environment:
+      POSTGRES_DB: auromart
+      POSTGRES_USER: auromart
+      POSTGRES_PASSWORD: auromart123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - auromart-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auromart -d auromart"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Flask Backend
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: auromart-backend
+    environment:
+      DATABASE_URL: postgresql://auromart:auromart123@postgres:5432/auromart
+      SECRET_KEY: your-super-secret-key-change-in-production
+      FLASK_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auromart-network
+    volumes:
+      - ./server:/app
+      - /app/__pycache__
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: auromart-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - auromart-network
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: auromart-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - auromart-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  auromart-network:
+    driver: bridge 

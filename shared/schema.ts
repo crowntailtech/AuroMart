@@ -249,6 +249,25 @@ export const partnerships = pgTable("partnerships", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Favorites table for users to save their preferred partners
+export const favorites = pgTable("favorites", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  favoriteUserId: varchar("favorite_user_id").notNull().references(() => users.id),
+  favoriteType: varchar("favorite_type", { enum: ["manufacturer", "distributor", "retailer"] }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Product search history for better recommendations
+export const searchHistory = pgTable("search_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  searchTerm: varchar("search_term").notNull(),
+  searchType: varchar("search_type", { enum: ["product", "manufacturer", "distributor"] }).notNull(),
+  resultCount: integer("result_count").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,
   createdAt: true,
@@ -258,6 +277,16 @@ export const insertPartnershipSchema = createInsertSchema(partnerships).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertFavoriteSchema = createInsertSchema(favorites).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSearchHistorySchema = createInsertSchema(searchHistory).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
@@ -277,6 +306,26 @@ export const partnershipsRelations = relations(partnerships, ({ one }) => ({
   }),
 }));
 
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+  user: one(users, {
+    fields: [favorites.userId],
+    references: [users.id],
+    relationName: "favoriteUser",
+  }),
+  favoriteUser: one(users, {
+    fields: [favorites.favoriteUserId],
+    references: [users.id],
+    relationName: "favoritedUser",
+  }),
+}));
+
+export const searchHistoryRelations = relations(searchHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [searchHistory.userId],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
   sentPartnershipRequests: many(partnerships, { relationName: "partnershipRequester" }),
   receivedPartnershipRequests: many(partnerships, { relationName: "partnershipPartner" }),
@@ -284,10 +333,17 @@ export const usersRelations = relations(users, ({ many }) => ({
   distributorInventory: many(inventory),
   customerOrders: many(orders, { relationName: "customerOrders" }),
   supplierOrders: many(orders, { relationName: "supplierOrders" }),
+  favorites: many(favorites, { relationName: "favoriteUser" }),
+  favoritedBy: many(favorites, { relationName: "favoritedUser" }),
+  searchHistory: many(searchHistory),
 }));
 
 export type Partnership = typeof partnerships.$inferSelect;
 export type InsertPartnership = typeof partnerships.$inferInsert;
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = typeof favorites.$inferInsert;
+export type SearchHistory = typeof searchHistory.$inferSelect;
+export type InsertSearchHistory = typeof searchHistory.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;

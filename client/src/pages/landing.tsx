@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, ShoppingCart, Factory, Shield, MessageCircle, FileText, BarChart3, Users } from "lucide-react";
+import LoginForm from "@/components/auth/login-form";
 
 export default function Landing() {
+  const [showLogin, setShowLogin] = useState(false);
+
   const features = [
     {
       icon: ShoppingCart,
@@ -57,6 +61,28 @@ export default function Landing() {
     }
   ];
 
+  if (showLogin) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-primary mb-2">AuroMart</h1>
+            <p className="text-gray-600">Sign in to your account</p>
+          </div>
+          <LoginForm />
+          <div className="text-center mt-4">
+            <Button 
+              variant="link" 
+              onClick={() => setShowLogin(false)}
+            >
+              ← Back to Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -66,13 +92,22 @@ export default function Landing() {
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-primary">AuroMart</h1>
             </div>
-            <Button 
-              onClick={() => window.location.href = '/api/login'}
-              className="action-button-primary"
-              data-testid="button-login"
-            >
-              Get Started
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setShowLogin(true)}
+                className="action-button-primary"
+                data-testid="button-login"
+              >
+                Sign In
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/register'}
+                variant="outline"
+                data-testid="button-register"
+              >
+                Sign Up
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -92,20 +127,20 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              size="lg"
-              onClick={() => window.location.href = '/api/login'}
-              className="action-button-primary text-lg px-8 py-3"
-              data-testid="button-start-ordering"
+              size="lg" 
+              onClick={() => window.location.href = '/register'}
+              className="action-button-primary"
+              data-testid="button-get-started"
             >
-              Start Ordering
+              Get Started
             </Button>
             <Button 
-              size="lg"
+              size="lg" 
               variant="outline"
-              className="text-lg px-8 py-3"
-              data-testid="button-learn-more"
+              onClick={() => setShowLogin(true)}
+              data-testid="button-demo"
             >
-              Learn More
+              Try Demo
             </Button>
           </div>
         </div>

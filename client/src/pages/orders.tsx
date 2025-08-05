@@ -23,14 +23,14 @@ export default function Orders() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/";
       }, 500);
       return;
     }
   }, [user, isLoading, toast]);
 
   const { data: orders, isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/orders"],
+    queryKey: ["api", "orders"],
     enabled: !!user,
   });
 

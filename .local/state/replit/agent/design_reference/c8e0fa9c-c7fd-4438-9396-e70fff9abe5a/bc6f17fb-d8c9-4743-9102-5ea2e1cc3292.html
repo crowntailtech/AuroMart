@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuroMart - B2B Ordering & Billing Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        error: '#EF4444',
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- @COMPONENT: Navigation Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">AuroMart</h1>
+                    </div>
+                    <nav class="hidden md:ml-8 md:flex md:space-x-8">
+                        <a href="#dashboard" class="text-primary border-b-2 border-primary px-1 pb-4 text-sm font-medium">Dashboard</a>
+                        <a href="#products" class="text-gray-500 hover:text-gray-700 px-1 pb-4 text-sm font-medium">Products</a>
+                        <a href="#orders" class="text-gray-500 hover:text-gray-700 px-1 pb-4 text-sm font-medium">Orders</a>
+                        <a href="#reports" class="text-gray-500 hover:text-gray-700 px-1 pb-4 text-sm font-medium">Reports</a>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- WhatsApp Integration Indicator -->
+                    <div class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                        <i class="fab fa-whatsapp mr-2"></i>
+                        <span data-mock="true">Connected</span>
+                    </div>
+                    <!-- Role Badge -->
+                    <div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                        <span data-bind="user.role">Retailer</span>
+                    </div>
+                    <!-- Profile -->
+                    <div class="flex items-center space-x-3">
+                        <img class="h-8 w-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" alt="Profile" data-mock-image="true">
+                        <span class="text-sm font-medium text-gray-700" data-bind="user.name" data-mock="true">Rajesh Kumar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Navigation Header -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- @COMPONENT: Quick Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shopping-cart text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Orders</p>
+                        <p class="text-2xl font-semibold text-gray-900" data-bind="stats.totalOrders" data-mock="true">247</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-secondary">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span data-mock="true">12% from last month</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-truck text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Orders</p>
+                        <p class="text-2xl font-semibold text-gray-900" data-bind="stats.pendingOrders" data-mock="true">8</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-accent">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span data-mock="true">2 urgent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-rupee-sign text-accent"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Monthly Spend</p>
+                        <p class="text-2xl font-semibold text-gray-900" data-bind="stats.monthlySpend" data-mock="true">₹2,45,670</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-secondary">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span data-mock="true">8% from last month</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-error/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-store text-error"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Active Distributors</p>
+                        <p class="text-2xl font-semibold text-gray-900" data-bind="stats.activeDistributors" data-mock="true">12</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-map-marker-alt mr-1"></i>
+                        <span data-mock="true">In your area</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Quick Stats Cards -->
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- @COMPONENT: Recent Orders -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900">Recent Orders</h3>
+                            <button class="text-primary hover:text-primary/80 text-sm font-medium" data-event="click:viewAllOrders">View All</button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <!-- @MAP: recentOrders.map(order => ( -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-box text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900" data-bind="order.id" data-mock="true">Order #ORD-2024-001</p>
+                                        <p class="text-sm text-gray-600" data-bind="order.distributor" data-mock="true">Sharma Electronics Distributor</p>
+                                        <p class="text-xs text-gray-500" data-bind="order.date" data-mock="true">2 hours ago</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-gray-900" data-bind="order.amount" data-mock="true">₹12,450</p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                                        <span data-bind="order.status" data-mock="true">Confirmed</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-box text-accent"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900" data-bind="order.id" data-mock="true">Order #ORD-2024-002</p>
+                                        <p class="text-sm text-gray-600" data-bind="order.distributor" data-mock="true">Metro Wholesale Hub</p>
+                                        <p class="text-xs text-gray-500" data-bind="order.date" data-mock="true">1 day ago</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-gray-900" data-bind="order.amount" data-mock="true">₹8,900</p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
+                                        <span data-bind="order.status" data-mock="true">Out for Delivery</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-box text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900" data-bind="order.id" data-mock="true">Order #ORD-2024-003</p>
+                                        <p class="text-sm text-gray-600" data-bind="order.distributor" data-mock="true">Global Supply Chain</p>
+                                        <p class="text-xs text-gray-500" data-bind="order.date" data-mock="true">3 days ago</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-gray-900" data-bind="order.amount" data-mock="true">₹15,670</p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                                        <span data-bind="order.status" data-mock="true">Delivered</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP -->
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: Recent Orders -->
+
+            <!-- @COMPONENT: Quick Actions & WhatsApp Integration -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <button class="w-full flex items-center justify-center px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors" data-event="click:newOrder">
+                            <i class="fas fa-plus mr-2"></i>
+                            New Order
+                        </button>
+                        <button class="w-full flex items-center justify-center px-4 py-3 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors" data-event="click:browseProducts">
+                            <i class="fas fa-search mr-2"></i>
+                            Browse Products
+                        </button>
+                        <button class="w-full flex items-center justify-center px-4 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors" data-event="click:downloadReports">
+                            <i class="fas fa-download mr-2"></i>
+                            Download Reports
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Notifications -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <i class="fab fa-whatsapp text-secondary mr-2"></i>
+                            <h3 class="text-lg font-semibold text-gray-900">WhatsApp Updates</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-secondary rounded-full mt-2"></div>
+                                <div>
+                                    <p class="text-sm text-gray-900" data-mock="true">Order #ORD-2024-001 confirmed by Sharma Electronics</p>
+                                    <p class="text-xs text-gray-500" data-mock="true">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-accent rounded-full mt-2"></div>
+                                <div>
+                                    <p class="text-sm text-gray-900" data-mock="true">Invoice sent for Order #ORD-2024-002</p>
+                                    <p class="text-xs text-gray-500" data-mock="true">1 day ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-2 h-2 bg-secondary rounded-full mt-2"></div>
+                                <div>
+                                    <p class="text-sm text-gray-900" data-mock="true">Monthly report is ready for download</p>
+                                    <p class="text-xs text-gray-500" data-mock="true">3 days ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: Quick Actions & WhatsApp Integration -->
+        </div>
+
+        <!-- @COMPONENT: Product Catalog Section -->
+        <div class="mt-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Featured Products</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <input type="text" placeholder="Search products..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-event="input:searchProducts">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent" data-event="change:filterCategory">
+                                <option data-mock="true">All Categories</option>
+                                <option data-mock="true">Electronics</option>
+                                <option data-mock="true">Clothing</option>
+                                <option data-mock="true">Home & Garden</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <!-- @MAP: featuredProducts.map(product => ( -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            <!-- Modern laptop in a clean office setting -->
+                            <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250" alt="Product" class="w-full h-48 object-cover" data-mock-image="true">
+                            <div class="p-4">
+                                <h4 class="font-semibold text-gray-900" data-bind="product.name" data-mock="true">Premium Laptop - Dell XPS 13</h4>
+                                <p class="text-sm text-gray-600 mt-1" data-bind="product.distributor" data-mock="true">By: Tech Distribution Co.</p>
+                                <div class="flex items-center justify-between mt-3">
+                                    <span class="text-lg font-bold text-gray-900" data-bind="product.price" data-mock="true">₹85,000</span>
+                                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors" data-event="click:addToCart">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                                        <span data-bind="product.stock" data-mock="true">In Stock</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            <!-- Smartphone display in retail environment -->
+                            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250" alt="Product" class="w-full h-48 object-cover" data-mock-image="true">
+                            <div class="p-4">
+                                <h4 class="font-semibold text-gray-900" data-bind="product.name" data-mock="true">Smartphone - iPhone 15</h4>
+                                <p class="text-sm text-gray-600 mt-1" data-bind="product.distributor" data-mock="true">By: Mobile World Distributors</p>
+                                <div class="flex items-center justify-between mt-3">
+                                    <span class="text-lg font-bold text-gray-900" data-bind="product.price" data-mock="true">₹79,900</span>
+                                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors" data-event="click:addToCart">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent">
+                                        <span data-bind="product.stock" data-mock="true">Limited Stock</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            <!-- Fashion clothing display -->
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250" alt="Product" class="w-full h-48 object-cover" data-mock-image="true">
+                            <div class="p-4">
+                                <h4 class="font-semibold text-gray-900" data-bind="product.name" data-mock="true">Cotton T-Shirt Bundle</h4>
+                                <p class="text-sm text-gray-600 mt-1" data-bind="product.distributor" data-mock="true">By: Fashion Forward Supply</p>
+                                <div class="flex items-center justify-between mt-3">
+                                    <span class="text-lg font-bold text-gray-900" data-bind="product.price" data-mock="true">₹1,200</span>
+                                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors" data-event="click:addToCart">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                                        <span data-bind="product.stock" data-mock="true">In Stock</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            <!-- Home appliance in modern kitchen -->
+                            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250" alt="Product" class="w-full h-48 object-cover" data-mock-image="true">
+                            <div class="p-4">
+                                <h4 class="font-semibold text-gray-900" data-bind="product.name" data-mock="true">Kitchen Appliance Set</h4>
+                                <p class="text-sm text-gray-600 mt-1" data-bind="product.distributor" data-mock="true">By: Home Solutions Ltd.</p>
+                                <div class="flex items-center justify-between mt-3">
+                                    <span class="text-lg font-bold text-gray-900" data-bind="product.price" data-mock="true">₹25,500</span>
+                                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors" data-event="click:addToCart">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                                        <span data-bind="product.stock" data-mock="true">In Stock</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Product Catalog Section -->
+
+        <!-- @COMPONENT: Role-Based Dashboard Previews -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Multi-Role Dashboard Views</h2>
+            
+            <!-- Distributor Dashboard Preview -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-secondary/5 to-secondary/10">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-warehouse text-secondary"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Distributor Dashboard</h3>
+                        <span class="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">Demo View</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-secondary/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Pending Orders</h4>
+                            <p class="text-2xl font-bold text-secondary" data-mock="true">23</p>
+                            <p class="text-sm text-gray-600" data-mock="true">Need approval</p>
+                        </div>
+                        <div class="bg-accent/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Inventory Items</h4>
+                            <p class="text-2xl font-bold text-accent" data-mock="true">1,247</p>
+                            <p class="text-sm text-gray-600" data-mock="true">Across categories</p>
+                        </div>
+                        <div class="bg-primary/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Active Retailers</h4>
+                            <p class="text-2xl font-bold text-primary" data-mock="true">89</p>
+                            <p class="text-sm text-gray-600" data-mock="true">This month</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Recent Order Approvals</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span data-mock="true">Rajesh Electronics - Order #ORD-2024-001</span>
+                                <div class="flex space-x-2">
+                                    <button class="bg-secondary text-white px-3 py-1 rounded text-xs" data-event="click:approveOrder">Approve</button>
+                                    <button class="bg-error text-white px-3 py-1 rounded text-xs" data-event="click:rejectOrder">Reject</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span data-mock="true">Kumar Store - Order #ORD-2024-002</span>
+                                <div class="flex space-x-2">
+                                    <button class="bg-secondary text-white px-3 py-1 rounded text-xs" data-event="click:approveOrder">Approve</button>
+                                    <button class="bg-error text-white px-3 py-1 rounded text-xs" data-event="click:rejectOrder">Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manufacturer Dashboard Preview -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-accent/5 to-accent/10">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-industry text-accent"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Manufacturer Dashboard</h3>
+                        <span class="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">Demo View</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-accent/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Products in Market</h4>
+                            <p class="text-2xl font-bold text-accent" data-mock="true">156</p>
+                            <p class="text-sm text-gray-600" data-mock="true">Across distributors</p>
+                        </div>
+                        <div class="bg-secondary/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Monthly Sales</h4>
+                            <p class="text-2xl font-bold text-secondary" data-mock="true">₹12.5L</p>
+                            <p class="text-sm text-gray-600" data-mock="true">Through platform</p>
+                        </div>
+                        <div class="bg-primary/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Partner Distributors</h4>
+                            <p class="text-2xl font-bold text-primary" data-mock="true">34</p>
+                            <p class="text-sm text-gray-600" data-mock="true">Active partnerships</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Performance Analytics</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Top Performing Product</p>
+                                <p class="font-medium" data-mock="true">Premium Laptop Series</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Best Region</p>
+                                <p class="font-medium" data-mock="true">Maharashtra</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard Preview -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-error/5 to-error/10">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-error/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-cog text-error"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Admin Dashboard</h3>
+                        <span class="ml-4 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error/10 text-error">Demo View</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-primary/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Total Users</h4>
+                            <p class="text-2xl font-bold text-primary" data-mock="true">2,847</p>
+                            <p class="text-sm text-gray-600" data-mock="true">All roles</p>
+                        </div>
+                        <div class="bg-secondary/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Platform Revenue</h4>
+                            <p class="text-2xl font-bold text-secondary" data-mock="true">₹45.2L</p>
+                            <p class="text-sm text-gray-600" data-mock="true">This month</p>
+                        </div>
+                        <div class="bg-accent/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Total Orders</h4>
+                            <p class="text-2xl font-bold text-accent" data-mock="true">8,923</p>
+                            <p class="text-sm text-gray-600" data-mock="true">This month</p>
+                        </div>
+                        <div class="bg-error/5 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-900 mb-2">Active Issues</h4>
+                            <p class="text-2xl font-bold text-error" data-mock="true">12</p>
+                            <p class="text-sm text-gray-600" data-mock="true">Need attention</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 mb-3">Platform Management</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm" data-event="click:manageUsers">Manage Users</button>
+                            <button class="bg-secondary text-white px-4 py-2 rounded-lg text-sm" data-event="click:viewReports">View Reports</button>
+                            <button class="bg-accent text-white px-4 py-2 rounded-lg text-sm" data-event="click:sendNotifications">Send Notifications</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Role-Based Dashboard Previews -->
+
+        <!-- @COMPONENT: Order Management & PDF Invoice Section -->
+        <div class="mt-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Order Management & Invoice System</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Order Tracking -->
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Order Status Tracking</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white text-sm font-medium">1</div>
+                                    <div class="ml-4 flex-1">
+                                        <p class="font-medium text-gray-900">Order Placed</p>
+                                        <p class="text-sm text-gray-600" data-mock="true">Jan 15, 2024 - 10:30 AM</p>
+                                    </div>
+                                    <i class="fas fa-check-circle text-secondary"></i>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white text-sm font-medium">2</div>
+                                    <div class="ml-4 flex-1">
+                                        <p class="font-medium text-gray-900">Confirmed by Distributor</p>
+                                        <p class="text-sm text-gray-600" data-mock="true">Jan 15, 2024 - 11:15 AM</p>
+                                    </div>
+                                    <i class="fas fa-check-circle text-secondary"></i>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white text-sm font-medium">3</div>
+                                    <div class="ml-4 flex-1">
+                                        <p class="font-medium text-gray-900">Packed & Ready</p>
+                                        <p class="text-sm text-gray-600" data-mock="true">Jan 15, 2024 - 2:00 PM</p>
+                                    </div>
+                                    <i class="fas fa-clock text-accent"></i>
+                                </div>
+                                <div class="flex items-center opacity-50">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">4</div>
+                                    <div class="ml-4 flex-1">
+                                        <p class="font-medium text-gray-500">Out for Delivery</p>
+                                        <p class="text-sm text-gray-400" data-mock="true">Pending</p>
+                                    </div>
+                                    <i class="fas fa-circle text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Invoice & PDF Generation -->
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-4">Invoice & Reports</h4>
+                            <div class="space-y-4">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="font-medium text-gray-900" data-mock="true">Invoice #INV-2024-001</p>
+                                            <p class="text-sm text-gray-600" data-mock="true">Order #ORD-2024-001 - ₹12,450</p>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button class="bg-primary text-white px-3 py-2 rounded-lg text-sm" data-event="click:downloadPDF">
+                                                <i class="fas fa-download mr-1"></i>
+                                                PDF
+                                            </button>
+                                            <button class="bg-secondary text-white px-3 py-2 rounded-lg text-sm" data-event="click:sendWhatsApp">
+                                                <i class="fab fa-whatsapp mr-1"></i>
+                                                Share
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="font-medium text-gray-900" data-mock="true">Monthly Report - January 2024</p>
+                                            <p class="text-sm text-gray-600" data-mock="true">Complete order summary</p>
+                                        </div>
+                                        <button class="bg-accent text-white px-3 py-2 rounded-lg text-sm" data-event="click:downloadReport">
+                                            <i class="fas fa-file-alt mr-1"></i>
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="bg-secondary/10 rounded-lg p-4">
+                                    <div class="flex items-center">
+                                        <i class="fab fa-whatsapp text-secondary mr-2"></i>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Auto WhatsApp Delivery</p>
+                                            <p class="text-sm text-gray-600" data-mock="true">Invoices sent automatically via WhatsApp</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Order Management & PDF Invoice Section -->
+    </div>
+
+    <!-- @COMPONENT: Mobile Bottom Navigation (Mobile Only) -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden">
+        <div class="grid grid-cols-4 gap-1">
+            <button class="flex flex-col items-center justify-center py-2 text-primary" data-event="click:navigateDashboard">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-xs mt-1">Dashboard</span>
+            </button>
+            <button class="flex flex-col items-center justify-center py-2 text-gray-600" data-event="click:navigateProducts">
+                <i class="fas fa-box text-lg"></i>
+                <span class="text-xs mt-1">Products</span>
+            </button>
+            <button class="flex flex-col items-center justify-center py-2 text-gray-600" data-event="click:navigateOrders">
+                <i class="fas fa-shopping-cart text-lg"></i>
+                <span class="text-xs mt-1">Orders</span>
+            </button>
+            <button class="flex flex-col items-center justify-center py-2 text-gray-600" data-event="click:navigateProfile">
+                <i class="fas fa-user text-lg"></i>
+                <span class="text-xs mt-1">Profile</span>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Mobile Bottom Navigation -->
+
+    <script>
+        // TODO: Implement business logic, API calls, or state management
+        (function() {
+            // Demo interactive functionality for UI demonstration
+            
+            // Search functionality demo
+            const searchInputs = document.querySelectorAll('[data-event*="searchProducts"]');
+            searchInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    console.log('Searching for:', this.value);
+                    // TODO: Implement actual search functionality
+                });
+            });
+
+            // Button click handlers for demo
+            const buttons = document.querySelectorAll('[data-event*="click:"]');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.getAttribute('data-event').replace('click:', '');
+                    console.log('Action triggered:', action);
+                    
+                    // Visual feedback for demo
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                    
+                    // TODO: Implement actual button functionality
+                });
+            });
+
+            // Filter functionality demo
+            const filterSelects = document.querySelectorAll('[data-event*="filterCategory"]');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    console.log('Filtering by category:', this.value);
+                    // TODO: Implement actual filtering functionality
+                });
+            });
+
+            // Mobile responsiveness demo
+            function handleResize() {
+                const mobileNav = document.querySelector('.fixed.bottom-0');
+                if (window.innerWidth >= 768) {
+                    mobileNav?.classList.add('hidden');
+                } else {
+                    mobileNav?.classList.remove('hidden');
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Initial check
+        })();
+    </script>
+</body>
+</html>

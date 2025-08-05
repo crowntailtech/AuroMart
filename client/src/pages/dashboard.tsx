@@ -10,7 +10,7 @@ import { MessageCircle } from "lucide-react";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { User } from "@shared/schema";
+import type { User } from "@/hooks/useAuth";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -25,19 +25,19 @@ export default function Dashboard() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/";
       }, 500);
       return;
     }
   }, [user, isLoading, toast]);
 
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/analytics/stats"],
+    queryKey: ["api", "analytics", "stats"],
     enabled: !!user,
   });
 
   const { data: notifications } = useQuery({
-    queryKey: ["/api/notifications"],
+    queryKey: ["api", "notifications"],
     enabled: !!user,
   });
 
@@ -106,67 +106,15 @@ export default function Dashboard() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-4">
-                      <MessageCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">No recent notifications</p>
-                    </div>
+                    <p className="text-sm text-gray-500">No recent notifications</p>
                   )}
                 </div>
               </CardContent>
             </Card>
-
-            {/* Role-specific Info Card */}
-            {(user as User)?.role === 'retailer' && (
-              <Card className="bg-gradient-to-br from-primary/5 to-secondary/5">
-                <CardHeader>
-                  <CardTitle className="text-primary">Retailer Tips</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
-                      Browse products by category
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
-                      Track orders in real-time
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></div>
-                      Download monthly reports
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-
-            {(user as User)?.role === 'distributor' && (
-              <Card className="bg-gradient-to-br from-secondary/5 to-accent/5">
-                <CardHeader>
-                  <CardTitle className="text-secondary">Distributor Hub</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-secondary rounded-full mr-2"></div>
-                      Manage inventory levels
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-secondary rounded-full mr-2"></div>
-                      Process pending orders
-                    </li>
-                    <li className="flex items-center">
-                      <div className="w-1.5 h-1.5 bg-secondary rounded-full mr-2"></div>
-                      View retailer analytics
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>
-
+      
       <MobileNav />
     </div>
   );
