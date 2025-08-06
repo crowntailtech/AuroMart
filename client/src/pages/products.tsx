@@ -95,17 +95,46 @@ export default function Products() {
     enabled: !!user,
   });
 
-  // Fetch distributors
+  // Fetch distributors (for retailers and manufacturers)
   const { data: distributors = [], isLoading: distributorsLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "distributors"],
-    enabled: !!user,
+    queryKey: ["api", "partners", "distributors", searchTerm],
+    enabled: !!user && (user.role === "retailer" || user.role === "manufacturer"),
   });
 
-  // Fetch manufacturers (only for distributors)
-  const { data: manufacturers = [], isLoading: manufacturersLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "manufacturers"],
+  // Fetch retailers (for distributors only)
+  const { data: retailers = [], isLoading: retailersLoading } = useQuery<User[]>({
+    queryKey: ["api", "partners", "retailers", searchTerm],
     enabled: !!user && user?.role === "distributor",
   });
+
+  // Fetch manufacturers (for distributors only)
+  const { data: manufacturers = [], isLoading: manufacturersLoading } = useQuery<User[]>({
+    queryKey: ["api", "partners", "manufacturers", searchTerm],
+    enabled: !!user && user?.role === "distributor",
+  });
+
+  // Get available partners based on user role
+  const getAvailablePartners = () => {
+    if (!user) return [];
+    
+    if (user.role === "retailer" || user.role === "manufacturer") {
+      return distributors;
+    } else if (user.role === "distributor") {
+      return [...retailers, ...manufacturers];
+    }
+    
+    return [];
+  };
+
+  const availablePartners = getAvailablePartners();
+
+  // Filter partners based on search term
+  const filteredPartners = availablePartners.filter((partner) =>
+    partner.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    partner.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    partner.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    partner.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Add product mutation
   const addProductMutation = useMutation({
@@ -559,6 +588,12 @@ export default function Products() {
             <Card>
               <CardHeader>
                 <CardTitle>Browse by Partner</CardTitle>
+                <p className="text-sm text-gray-600">
+                  {user?.role === "distributor" 
+                    ? "Browse products from manufacturers and view order history with retailers"
+                    : "Browse products from distributors"
+                  }
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -575,32 +610,17 @@ export default function Products() {
                     </SelectTrigger>
                     <SelectContent className="bg-white border border-gray-200 shadow-lg">
                       <SelectItem value="all">All Partners</SelectItem>
-                      {user?.role === "distributor" ? (
-                        <>
-                          {distributors.map((distributor) => (
-                            <SelectItem key={distributor.id} value={distributor.id} className="hover:bg-gray-50">
-                              {distributor.businessName || `${distributor.firstName} ${distributor.lastName}`}
-                            </SelectItem>
-                          ))}
-                          {manufacturers.map((manufacturer) => (
-                            <SelectItem key={manufacturer.id} value={manufacturer.id} className="hover:bg-gray-50">
-                              {manufacturer.businessName || `${manufacturer.firstName} ${manufacturer.lastName}`}
-                            </SelectItem>
-                          ))}
-                        </>
-                      ) : (
-                        distributors.map((distributor) => (
-                          <SelectItem key={distributor.id} value={distributor.id} className="hover:bg-gray-50">
-                            {distributor.businessName || `${distributor.firstName} ${distributor.lastName}`}
-                          </SelectItem>
-                        ))
-                      )}
+                      {availablePartners.map((partner) => (
+                        <SelectItem key={partner.id} value={partner.id} className="hover:bg-gray-50">
+                          {partner.businessName || `${partner.firstName} ${partner.lastName}`}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {(user?.role === "distributor" ? [...distributors, ...manufacturers] : distributors).map((partner) => (
+                  {filteredPartners.map((partner) => (
                     <Card key={partner.id} className="hover:shadow-md transition-shadow">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
