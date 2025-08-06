@@ -36,7 +36,7 @@ interface Favorite {
 }
 
 export default function Partners() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,27 +70,31 @@ export default function Partners() {
   const availableTabs = getAvailableTabs();
 
   // Fetch favorites
-  const { data: favorites = [], isLoading: favoritesLoading } = useQuery<Favorite[]>({
+  const { data: favorites = [], isLoading: favoritesLoading, error: favoritesError } = useQuery<Favorite[]>({
     queryKey: ["api", "favorites"],
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isLoading,
+    retry: 3,
   });
 
   // Fetch distributors (for retailers and manufacturers)
-  const { data: distributors = [], isLoading: distributorsLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "distributors", searchTerm],
-    enabled: isAuthenticated && (activeTab === "distributors" || user?.role === "manufacturer"),
+  const { data: distributors = [], isLoading: distributorsLoading, error: distributorsError } = useQuery<User[]>({
+    queryKey: ["api", "partners", "distributors", searchTerm ? `?search=${searchTerm}` : ""],
+    enabled: isAuthenticated && !isLoading && (activeTab === "distributors" || user?.role === "manufacturer"),
+    retry: 3,
   });
 
   // Fetch retailers (for distributors only)
-  const { data: retailers = [], isLoading: retailersLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "retailers", searchTerm],
-    enabled: isAuthenticated && activeTab === "retailers" && user?.role === "distributor",
+  const { data: retailers = [], isLoading: retailersLoading, error: retailersError } = useQuery<User[]>({
+    queryKey: ["api", "partners", "retailers", searchTerm ? `?search=${searchTerm}` : ""],
+    enabled: isAuthenticated && !isLoading && activeTab === "retailers" && user?.role === "distributor",
+    retry: 3,
   });
 
   // Fetch manufacturers (for distributors only)
-  const { data: manufacturers = [], isLoading: manufacturersLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "manufacturers", searchTerm],
-    enabled: isAuthenticated && activeTab === "manufacturers" && user?.role === "distributor",
+  const { data: manufacturers = [], isLoading: manufacturersLoading, error: manufacturersError } = useQuery<User[]>({
+    queryKey: ["api", "partners", "manufacturers", searchTerm ? `?search=${searchTerm}` : ""],
+    enabled: isAuthenticated && !isLoading && activeTab === "manufacturers" && user?.role === "distributor",
+    retry: 3,
   });
 
   // Get current partners based on active tab and user role
@@ -139,7 +143,8 @@ export default function Partners() {
   // Add to favorites mutation
   const addToFavoritesMutation = useMutation({
     mutationFn: async ({ favoriteUserId, favoriteType }: { favoriteUserId: string; favoriteType: string }) => {
-      await apiRequest("POST", "/api/favorites", { favoriteUserId, favoriteType });
+      const response = await apiRequest("POST", "/api/favorites", { favoriteUserId, favoriteType });
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -156,7 +161,7 @@ export default function Partners() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.reload();
         }, 500);
         return;
       }
@@ -171,7 +176,8 @@ export default function Partners() {
   // Remove from favorites mutation
   const removeFromFavoritesMutation = useMutation({
     mutationFn: async (favoriteUserId: string) => {
-      await apiRequest("DELETE", `/api/favorites/${favoriteUserId}`);
+      const response = await apiRequest("DELETE", `/api/favorites/${favoriteUserId}`);
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -188,7 +194,7 @@ export default function Partners() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.reload();
         }, 500);
         return;
       }
@@ -258,6 +264,27 @@ export default function Partners() {
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white text-lg">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Handle API errors
+  if (favoritesError || distributorsError || retailersError || manufacturersError) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Data</h3>
+            <p className="text-gray-500 mb-4">
+              {favoritesError?.message || distributorsError?.message || retailersError?.message || manufacturersError?.message || "Failed to load partners data"}
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+        <MobileNav />
       </div>
     );
   }

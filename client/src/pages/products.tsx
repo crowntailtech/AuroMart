@@ -79,14 +79,16 @@ export default function Products() {
     }
   }, [user, isLoading, toast]);
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ["api", "products", "categories"],
-    enabled: !!user,
+    enabled: !!user && !isLoading,
+    retry: 3,
   });
 
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["api", "products", selectedCategory === "all" ? "" : selectedCategory],
-    enabled: !!user,
+  const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
+    queryKey: ["api", "products", selectedCategory === "all" ? "" : `?categoryId=${selectedCategory}`],
+    enabled: !!user && !isLoading,
+    retry: 3,
   });
 
   // Fetch favorites
@@ -96,21 +98,24 @@ export default function Products() {
   });
 
   // Fetch distributors (for retailers and manufacturers)
-  const { data: distributors = [], isLoading: distributorsLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "distributors", searchTerm],
-    enabled: !!user && (user.role === "retailer" || user.role === "manufacturer"),
+  const { data: distributors = [], isLoading: distributorsLoading, error: distributorsError } = useQuery<User[]>({
+    queryKey: ["api", "partners", "distributors", searchTerm ? `?search=${searchTerm}` : ""],
+    enabled: !!user && !isLoading && (user.role === "retailer" || user.role === "manufacturer"),
+    retry: 3,
   });
 
   // Fetch retailers (for distributors only)
-  const { data: retailers = [], isLoading: retailersLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "retailers", searchTerm],
-    enabled: !!user && user?.role === "distributor",
+  const { data: retailers = [], isLoading: retailersLoading, error: retailersError } = useQuery<User[]>({
+    queryKey: ["api", "partners", "retailers", searchTerm ? `?search=${searchTerm}` : ""],
+    enabled: !!user && !isLoading && user?.role === "distributor",
+    retry: 3,
   });
 
   // Fetch manufacturers (for distributors only)
-  const { data: manufacturers = [], isLoading: manufacturersLoading } = useQuery<User[]>({
-    queryKey: ["api", "partners", "manufacturers", searchTerm],
-    enabled: !!user && user?.role === "distributor",
+  const { data: manufacturers = [], isLoading: manufacturersLoading, error: manufacturersError } = useQuery<User[]>({
+    queryKey: ["api", "partners", "manufacturers", searchTerm ? `?search=${searchTerm}` : ""],
+    enabled: !!user && !isLoading && user?.role === "distributor",
+    retry: 3,
   });
 
   // Get available partners based on user role
@@ -139,7 +144,8 @@ export default function Products() {
   // Add product mutation
   const addProductMutation = useMutation({
     mutationFn: async (productData: any) => {
-      await apiRequest("POST", "/api/products", productData);
+      const response = await apiRequest("POST", "/api/products", productData);
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -179,7 +185,9 @@ export default function Products() {
     }
 
     const productData = {
-      ...newProduct,
+      name: newProduct.name,
+      description: newProduct.description,
+      sku: newProduct.sku,
       basePrice: parseFloat(newProduct.basePrice),
       categoryId: newProduct.categoryId || null,
       imageUrl: imageUploadType === 'url' ? newProduct.imageUrl : null
@@ -241,7 +249,8 @@ export default function Products() {
 
   const filteredProducts = Array.isArray(products) ? products.filter((product: any) =>
     product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : [];
 
   const getRoleIcon = (role: string) => {
@@ -292,6 +301,27 @@ export default function Products() {
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-white text-lg">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Handle API errors
+  if (productsError || categoriesError) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Data</h3>
+            <p className="text-gray-500 mb-4">
+              {productsError?.message || categoriesError?.message || "Failed to load products or categories"}
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+        <MobileNav />
       </div>
     );
   }

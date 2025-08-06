@@ -86,13 +86,13 @@ export default function ProductBrowser({ partner, isOpen, onClose }: ProductBrow
   };
 
   // Fetch products from partner
-  const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
+  const { data: products = [], isLoading: productsLoading, error: productsError } = useQuery<Product[]>({
     queryKey: ["api", "products", "partner", partner.id],
     enabled: isOpen && canPlaceOrders(),
   });
 
   // Fetch order history
-  const { data: orderHistory = [], isLoading: historyLoading } = useQuery<Order[]>({
+  const { data: orderHistory = [], isLoading: historyLoading, error: historyError } = useQuery<Order[]>({
     queryKey: ["api", "orders", "history", partner.id],
     enabled: isOpen && !canPlaceOrders(),
   });
@@ -100,7 +100,8 @@ export default function ProductBrowser({ partner, isOpen, onClose }: ProductBrow
   // Place order mutation
   const placeOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      await apiRequest("POST", "/api/orders", orderData);
+      const response = await apiRequest("POST", "/api/orders", orderData);
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -227,7 +228,19 @@ export default function ProductBrowser({ partner, isOpen, onClose }: ProductBrow
         {canPlaceOrders() ? (
           // New Order View
           <div className="space-y-6">
-            {productsLoading ? (
+            {productsError ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Products</h3>
+                  <p className="text-gray-500 mb-4">
+                    {productsError.message || "Failed to load products"}
+                  </p>
+                  <Button onClick={() => window.location.reload()}>
+                    Retry
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : productsLoading ? (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
                 <p className="text-sm text-gray-600 mt-2">Loading products...</p>
@@ -328,7 +341,19 @@ export default function ProductBrowser({ partner, isOpen, onClose }: ProductBrow
         ) : (
           // History View
           <div className="space-y-6">
-            {historyLoading ? (
+            {historyError ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Order History</h3>
+                  <p className="text-gray-500 mb-4">
+                    {historyError.message || "Failed to load order history"}
+                  </p>
+                  <Button onClick={() => window.location.reload()}>
+                    Retry
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : historyLoading ? (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
                 <p className="text-sm text-gray-600 mt-2">Loading order history...</p>
