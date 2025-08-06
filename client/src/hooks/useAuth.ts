@@ -12,6 +12,8 @@ export interface User {
   phoneNumber?: string;
   whatsappNumber?: string;
   isActive: boolean;
+  profileImageUrl?: string;
+  companyName?: string;
 }
 
 export interface LoginData {

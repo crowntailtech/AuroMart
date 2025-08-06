@@ -34,7 +34,7 @@ def create_app(config_name=None):
     # Setup CORS
     CORS(app, resources={
         r"/api/*": {
-            "origins": app.config.get('CORS_ORIGINS', ['http://localhost:3000', 'http://localhost:80']),
+            "origins": app.config.get('CORS_ORIGINS', ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:80']),
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
@@ -49,6 +49,8 @@ def create_app(config_name=None):
     from app.api.v1.partnerships import partnerships_bp
     from app.api.v1.search import search_bp
     from app.api.v1.health import health_bp
+    from app.api.v1.analytics import analytics_bp
+    from app.api.v1.notifications import notifications_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(partners_bp, url_prefix='/api/partners')
@@ -58,6 +60,8 @@ def create_app(config_name=None):
     app.register_blueprint(partnerships_bp, url_prefix='/api/partnerships')
     app.register_blueprint(search_bp, url_prefix='/api/search')
     app.register_blueprint(health_bp, url_prefix='/api')
+    app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+    app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     
     # Error handlers
     from app.errors import register_error_handlers

@@ -1,171 +1,159 @@
 # AuroMart - B2B Marketplace Platform
 
-A comprehensive B2B marketplace platform that connects retailers, distributors, and manufacturers. Built with React, Flask, and PostgreSQL, wrapped in Docker for easy deployment.
+A production-ready B2B marketplace platform built with Flask backend and React frontend, featuring role-based access control, partner management, and order processing.
 
-## Features
-
-### 🏪 **Multi-Role Support**
-- **Retailers**: Browse products, place orders, manage partnerships
-- **Distributors**: Manage inventory, fulfill orders, connect with manufacturers and retailers
-- **Manufacturers**: Create products, manage partnerships with distributors
-
-### 🤝 **Partner Management**
-- Browse partners by type (manufacturers/distributors)
-- Add partners to favorites for quick access
-- Send and manage partnership requests
-- Global search for partners when favorites don't have what you need
-
-### 📦 **Product Management**
-- Browse products by category
-- Browse products by partner (manufacturer/distributor)
-- Search products globally
-- View product details and inventory
-
-### 💼 **Order Management**
-- Place orders with distributors
-- Track order status
-- View order history
-- Manage delivery preferences
-
-### 🔍 **Advanced Search**
-- Search products by name, description, or category
-- Search partners by business name, email, or role
-- Global product search when favorites don't have items
-- Search history tracking
-
-### ⭐ **Favorites System**
-- Add preferred partners to favorites
-- Quick access to favorite partners
-- Browse products from favorite partners
-- Remove partners from favorites
-
-## Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend│    │  Flask Backend  │    │  PostgreSQL DB  │
-│   (Port 80)     │◄──►│   (Port 5000)   │◄──►│   (Port 5432)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   Redis Cache   │
-                    │   (Port 6379)   │
-                    └─────────────────┘
-```
-
-## Quick Start with Docker
+## 🚀 Quick Start
 
 ### Prerequisites
-- Docker
-- Docker Compose
+- Docker and Docker Compose installed
+- At least 4GB RAM available
 
-### 1. Clone the Repository
+### Running the Application
+
+1. **Clone and navigate to the project:**
 ```bash
-git clone <repository-url>
 cd AuroMart
 ```
 
-### 2. Start the Application
+2. **Start all services:**
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-This will start:
-- PostgreSQL database on port 5432
-- Flask backend on port 5000
-- React frontend on port 80
-- Redis cache on port 6379
-
-### 3. Access the Application
-- Frontend: http://localhost
+3. **Access the application:**
+- Frontend: http://localhost:80
 - Backend API: http://localhost:5000
-- Database: localhost:5432
+- Health Check: http://localhost:5000/api/health
 
-### 4. Stop the Application
+4. **View logs:**
 ```bash
-docker-compose down
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f backend
+docker-compose logs -f frontend
 ```
 
-## Development Setup
+## 🏗️ Architecture
 
-### Frontend (React + TypeScript)
+### Services
+- **Frontend**: React + TypeScript + Vite (Nginx)
+- **Backend**: Flask + SQLAlchemy + JWT (Python)
+- **Database**: PostgreSQL
+- **Cache**: Redis (optional)
+
+### Features
+- ✅ **Multi-role Platform**: Retailers, Distributors, Manufacturers
+- ✅ **Partner Management**: Browse by distributor/manufacturer
+- ✅ **Favorites System**: Add partners to favorites
+- ✅ **Role-based Visibility**: Secure access control
+- ✅ **Global Search**: Search products and partners
+- ✅ **Order Management**: Complete order workflow
+- ✅ **JWT Authentication**: Secure API access
+- ✅ **Docker Containerization**: Production-ready deployment
+
+## 🔧 Development
+
+### Backend (Flask)
+```bash
+cd server
+pip install -r requirements.txt
+python run.py
+```
+
+### Frontend (React)
 ```bash
 cd client
 npm install
 npm run dev
 ```
 
-### Backend (Flask)
-```bash
-cd server
-pip install -r requirements.txt
-python app.py
-```
-
-### Database
-```bash
-# Using Docker
-docker run -d \
-  --name postgres \
-  -e POSTGRES_DB=auromart \
-  -e POSTGRES_USER=auromart \
-  -e POSTGRES_PASSWORD=auromart123 \
-  -p 5432:5432 \
-  postgres:15-alpine
-```
-
-## API Endpoints
+## 📊 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-- `GET /api/auth/user` - Get current user info
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/user` - Get current user
 
 ### Partners
 - `GET /api/partners/distributors` - Get distributors
-- `GET /api/partners/manufacturers` - Get manufacturers (distributors only)
+- `GET /api/partners/manufacturers` - Get manufacturers
 - `GET /api/partners/available` - Get available partners
-- `GET /api/partners/search` - Search partners globally
 
 ### Favorites
 - `GET /api/favorites` - Get user favorites
 - `POST /api/favorites` - Add to favorites
 - `DELETE /api/favorites/<id>` - Remove from favorites
 
-### Partnerships
-- `GET /api/partnerships` - Get user partnerships
-- `POST /api/partnerships/request` - Send partnership request
-
 ### Products
 - `GET /api/products` - Get products
-- `GET /api/categories` - Get categories
+- `GET /api/products/categories` - Get categories
+- `GET /api/products/search` - Search products
 
-## Database Schema
+### Orders
+- `GET /api/orders` - Get user orders
+- `POST /api/orders` - Create order
+- `PATCH /api/orders/<id>/status` - Update order status
 
-### Core Tables
-- `users` - User accounts and profiles
-- `products` - Product catalog
-- `inventory` - Distributor inventory
-- `orders` - Order management
-- `order_items` - Order line items
-- `partnerships` - Business partnerships
-- `favorites` - User favorite partners
-- `search_history` - Search tracking
+## 🐳 Docker Commands
 
-### Relationships
-- Retailers can only see distributors
-- Distributors can see both retailers and manufacturers
-- Manufacturers can only see distributors
-- Partners can be added to favorites for quick access
+```bash
+# Start all services
+docker-compose up -d
 
-## Environment Variables
+# Rebuild and start
+docker-compose up -d --build
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Access database
+docker-compose exec postgres psql -U auromart -d auromart
+
+# Access backend shell
+docker-compose exec backend python
+
+# Access frontend container
+docker-compose exec frontend sh
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts**: Make sure ports 80 and 5000 are available
+2. **Database connection**: Wait for PostgreSQL to be ready (health check)
+3. **Build failures**: Clear Docker cache: `docker system prune -a`
+
+### Health Checks
+- Backend: http://localhost:5000/api/health
+- Frontend: http://localhost:80/health
+- Database: `docker-compose exec postgres pg_isready -U auromart`
+
+### Logs
+```bash
+# Backend logs
+docker-compose logs backend
+
+# Frontend logs
+docker-compose logs frontend
+
+# Database logs
+docker-compose logs postgres
+```
+
+## 📝 Environment Variables
 
 ### Backend (.env)
 ```env
-DATABASE_URL=postgresql://auromart:auromart123@localhost:5432/auromart
-SECRET_KEY=your-super-secret-key-change-in-production
-FLASK_ENV=production
+FLASK_ENV=docker
+DATABASE_URL=postgresql://auromart:auromart123@postgres:5432/auromart
+SECRET_KEY=your-secret-key-here
+JWT_SECRET_KEY=your-jwt-secret-key-here
 ```
 
 ### Frontend (.env)
@@ -173,63 +161,15 @@ FLASK_ENV=production
 VITE_API_URL=http://localhost:5000
 ```
 
-## Docker Commands
+## 🚀 Production Deployment
 
-### Build Images
-```bash
-docker-compose build
-```
+For production deployment, consider:
+- Using environment-specific Docker Compose files
+- Setting up SSL/TLS certificates
+- Configuring proper logging and monitoring
+- Setting up database backups
+- Using a reverse proxy (Nginx/Traefik)
 
-### View Logs
-```bash
-docker-compose logs -f
-```
+## 📄 License
 
-### Access Container Shell
-```bash
-docker-compose exec backend bash
-docker-compose exec frontend sh
-```
-
-### Database Backup
-```bash
-docker-compose exec postgres pg_dump -U auromart auromart > backup.sql
-```
-
-### Database Restore
-```bash
-docker-compose exec -T postgres psql -U auromart auromart < backup.sql
-```
-
-## Production Deployment
-
-### 1. Update Environment Variables
-```bash
-# Update docker-compose.yml with production values
-SECRET_KEY=your-production-secret-key
-DATABASE_URL=your-production-database-url
-```
-
-### 2. Build and Deploy
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
-
-### 3. SSL/HTTPS Setup
-Add nginx reverse proxy with SSL certificates for production.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support, email support@auromart.com or create an issue in the repository. 
+This project is licensed under the MIT License. 

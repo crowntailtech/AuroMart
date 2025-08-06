@@ -220,17 +220,26 @@ export default function Partners() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="favorites" className="flex items-center gap-2">
+          <TabsList className="enhanced-tabs grid w-full grid-cols-3">
+            <TabsTrigger 
+              value="favorites" 
+              className="enhanced-tab-trigger"
+            >
               <Heart className="h-4 w-4" />
               Favorites ({favorites.length})
             </TabsTrigger>
-            <TabsTrigger value="distributors" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="distributors" 
+              className="enhanced-tab-trigger"
+            >
               <Package className="h-4 w-4" />
               Distributors
             </TabsTrigger>
             {user?.role === "distributor" && (
-              <TabsTrigger value="manufacturers" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="manufacturers" 
+                className="enhanced-tab-trigger"
+              >
                 <Building2 className="h-4 w-4" />
                 Manufacturers
               </TabsTrigger>

@@ -1,7 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // API Base URL - change this to your Flask backend URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5001';
 
 // Get JWT token from localStorage
 function getAuthToken(): string | null {
@@ -64,7 +64,15 @@ export const getQueryFn: <T>(options: {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_BASE_URL}/${queryKey.join("/")}`, {
+    // Construct URL properly with trailing slash for endpoints that need it
+    const path = queryKey.join("/");
+    const url = path.startsWith('/') ? path : `/${path}`;
+    
+    // Add trailing slash for specific endpoints that need it
+    const endpointsNeedingTrailingSlash = ['api/orders', 'api/products', 'api/favorites', 'api/partnerships', 'api/notifications'];
+    const finalUrl = endpointsNeedingTrailingSlash.some(endpoint => url.includes(endpoint)) ? `${url}/` : url;
+
+    const res = await fetch(`${API_BASE_URL}${finalUrl}`, {
       headers,
     });
 

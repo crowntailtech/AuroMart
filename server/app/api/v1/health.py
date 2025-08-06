@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from app import db
+from sqlalchemy import text
 from datetime import datetime
 
 health_bp = Blueprint('health', __name__)
@@ -9,7 +10,7 @@ def health_check():
     """Health check endpoint"""
     try:
         # Test database connection
-        db.session.execute('SELECT 1')
+        db.session.execute(text('SELECT 1'))
         
         return jsonify({
             'status': 'healthy',

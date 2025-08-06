@@ -23,7 +23,7 @@ def register():
         if existing_user:
             return jsonify({'message': 'User with this email already exists'}), 409
         
-        # Create new user
+        # Create new user without password first
         new_user = User(
             email=data['email'],
             first_name=data['firstName'],
@@ -36,7 +36,7 @@ def register():
             is_active=True
         )
         
-        # Set password
+        # Manually set the password
         new_user.set_password(data['password'])
         
         db.session.add(new_user)
@@ -59,6 +59,9 @@ def login():
     """Login user and return JWT token"""
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'message': 'No data provided'}), 400
+            
         email = data.get('email')
         password = data.get('password')
         
@@ -67,11 +70,18 @@ def login():
         
         # Find user
         user = User.query.filter_by(email=email, is_active=True).first()
-        if not user or not user.check_password(password):
+        if not user:
+            return jsonify({'message': 'Invalid email or password'}), 401
+        
+        # Check password
+        if not user.check_password(password):
             return jsonify({'message': 'Invalid email or password'}), 401
         
         # Create access token
-        access_token = create_access_token(identity=str(user.id))
+        try:
+            access_token = create_access_token(identity=str(user.id))
+        except Exception as e:
+            return jsonify({'message': 'Token creation failed', 'error': str(e)}), 500
         
         return jsonify({
             'message': 'Login successful',

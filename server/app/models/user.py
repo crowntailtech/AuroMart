@@ -17,25 +17,26 @@ class User(db.Model):
     address = db.Column(db.Text, nullable=True)
     phone_number = db.Column(db.String(50), nullable=True)
     whatsapp_number = db.Column(db.String(50), nullable=True)
+    password_hash = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Password field (not stored in database, only for registration)
-    _password = None
-    
     def __init__(self, **kwargs):
+        password = kwargs.pop('password', None)
         super(User, self).__init__(**kwargs)
-        if kwargs.get('password'):
-            self.set_password(kwargs['password'])
+        if password:
+            self.set_password(password)
     
     def set_password(self, password):
         """Set password hash"""
-        self._password = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         """Check password hash"""
-        return check_password_hash(self._password, password)
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
         """Convert to dictionary"""

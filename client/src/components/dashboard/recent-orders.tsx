@@ -4,11 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, Eye } from "lucide-react";
 
-interface RecentOrdersProps {
-  userRole: string;
-}
-
-export default function RecentOrders({ userRole }: RecentOrdersProps) {
+export default function RecentOrders() {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["api", "orders"],
   });

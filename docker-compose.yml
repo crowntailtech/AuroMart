@@ -1,10 +1,6 @@
-version: '3.8'
-
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: auromart-postgres
     environment:
       POSTGRES_DB: auromart
       POSTGRES_USER: auromart
@@ -14,63 +10,53 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
-    networks:
-      - auromart-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U auromart -d auromart"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Flask Backend
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: auromart-backend
     environment:
-      DATABASE_URL: postgresql://auromart:auromart123@postgres:5432/auromart
-      SECRET_KEY: your-super-secret-key-change-in-production
-      FLASK_ENV: production
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://auromart:auromart123@postgres:5432/auromart
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=auromart-secret-key-2024-super-secure
+      - JWT_SECRET_KEY=auromart-jwt-secret-key-2024-super-secure
     ports:
-      - "5000:5000"
+      - "5001:5000"
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - auromart-network
-    volumes:
-      - ./server:/app
-      - /app/__pycache__
-    restart: unless-stopped
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # React Frontend
   frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: auromart-frontend
     ports:
-      - "80:80"
+      - "3001:80"
     depends_on:
       - backend
-    networks:
-      - auromart-network
-    restart: unless-stopped
-
-  # Redis for caching (optional)
-  redis:
-    image: redis:7-alpine
-    container_name: auromart-redis
-    ports:
-      - "6379:6379"
-    networks:
-      - auromart-network
-    restart: unless-stopped
 
 volumes:
-  postgres_data:
-
-networks:
-  auromart-network:
-    driver: bridge 
+  postgres_data: 
