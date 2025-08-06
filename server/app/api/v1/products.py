@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import Product, Category, Inventory, User
-from app.utils.decorators import role_required
+from app.utils.decorators import roles_required
 from sqlalchemy import or_
 
 products_bp = Blueprint('products', __name__)
@@ -40,7 +40,7 @@ def get_product(product_id):
 
 @products_bp.route('/', methods=['POST'])
 @jwt_required()
-@role_required(['manufacturer', 'distributor'])
+@roles_required(['manufacturer', 'distributor'])
 def create_product():
     """Create new product (manufacturers and distributors)"""
     try:

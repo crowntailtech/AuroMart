@@ -42,7 +42,7 @@ def roles_required(required_roles):
                 return jsonify({'message': 'User not found'}), 404
             
             if user.role not in required_roles:
-                return jsonify({'message': f'Access denied. One of {required_roles} roles required'}), 403
+                return jsonify({'message': f'Access denied. {required_roles} role required'}), 403
             
             return f(*args, **kwargs)
         return decorated_function
