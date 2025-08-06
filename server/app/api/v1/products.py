@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models import Product, Category, Inventory
+from app.models import Product, Category, Inventory, User
 from app.utils.decorators import role_required
 from sqlalchemy import or_
 
@@ -40,9 +40,9 @@ def get_product(product_id):
 
 @products_bp.route('/', methods=['POST'])
 @jwt_required()
-@role_required('manufacturer')
+@role_required(['manufacturer', 'distributor'])
 def create_product():
-    """Create new product (manufacturers only)"""
+    """Create new product (manufacturers and distributors)"""
     try:
         current_user_id = get_jwt_identity()
         data = request.get_json()
@@ -77,6 +77,39 @@ def create_product():
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': 'Failed to create product', 'error': str(e)}), 500
+
+@products_bp.route('/partner/<partner_id>', methods=['GET'])
+@jwt_required()
+def get_partner_products(partner_id):
+    """Get products from a specific partner"""
+    try:
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+        partner = User.query.get(partner_id)
+        
+        if not partner:
+            return jsonify({'message': 'Partner not found'}), 404
+        
+        # Check if user can view partner's products
+        can_view = False
+        if current_user.role == 'retailer' and partner.role == 'distributor':
+            can_view = True
+        elif current_user.role == 'distributor' and partner.role == 'manufacturer':
+            can_view = True
+        
+        if not can_view:
+            return jsonify({'message': 'Access denied'}), 403
+        
+        # Get products from partner
+        products = Product.query.filter_by(
+            manufacturer_id=partner_id,
+            is_active=True
+        ).all()
+        
+        return jsonify([prod.to_dict() for prod in products]), 200
+        
+    except Exception as e:
+        return jsonify({'message': 'Failed to fetch partner products', 'error': str(e)}), 500
 
 @products_bp.route('/categories', methods=['GET'])
 def get_categories():
